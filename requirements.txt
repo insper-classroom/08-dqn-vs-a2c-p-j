@@ -8,3 +8,5 @@ stable_baselines3
 tensorboard
 tensorboard-data-server
 torch
+gymnasium[atari,accept-rom-license]
+AutoROM
