@@ -10,3 +10,4 @@ tensorboard-data-server
 torch
 gymnasium[atari,accept-rom-license]
 AutoROM
+stable-baselines3[extra]
