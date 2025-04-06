@@ -13,7 +13,7 @@ They will be used to solve the following environments:
 
 ## **Installing and running the experiments**
 
-To run the experiments, it is highly recommended to have a virtual environment and install the required packages:
+It is highly recommended to have a virtual environment and install the required packages to run these experiments:
 
 ```bash
 # Create a virtual environment
@@ -26,7 +26,7 @@ source venv/bin/activate
 # Install the required packages
 pip install -r requirements.txt
 ```
-After installing the requirements, you can run the experiments by running each of the python notebooks:
+Once dependencies are installed, you can run the experiments by running each of the python notebooks:
 
 * `cartpole.ipynb`
 * `lunar_lander.ipynb`
@@ -34,11 +34,11 @@ After installing the requirements, you can run the experiments by running each o
 
 ## **File structure**
 
-The output files for each experiments are stored in the following directories:
+The output files for each experiment are stored in the following directories:
 
 - `graphs/` - Contains the graphs saved for each environment.
 - `models/` - Contains the models saved for each environment. They can be loaded in all notebooks to skip the training process.
-- `results/` - Contains the logs saved for each environment. They have important data, but most importantly, the average reward over the time steps. This is the data used to plot the graphs.
+- `results/` - Contains the logs saved for each environment. They include key data, especially average reward over time steps. This is the data used to plot the graphs.
 
 ---
 
@@ -48,7 +48,7 @@ In the CartPole environment, the goal is to balance a pole on a cart. The cart c
 
 We have tested the two different reinforcement learning algorithms mentioned previously. For A2C, we only tested the default hyperparameters, as it was already enough to learn the environment.
 
-For DQN, the goal was to first test the default hyperparameters from the previous activities, to understand if there are differences in the implementation. However, given its pour results, we searched the internet for better hyperparameters to see if we could achieve better results. After searching for a bit we reached an open-source github repository, [rl-baselines3-zoo](https://github.com/DLR-RM/rl-baselines3-zoo), which has hyperparameters for different algorithms and environments. After using the ones provided for DQN we were able to achieve a better performance, but no were near the optimal performance, something the A2C did very well. 
+For DQN, the goal was to first test the default hyperparameters from the previous activities, to understand if there are differences in the implementation. However, given its poor results, we searched the internet for better hyperparameters to see if we could achieve better results. After searching for a bit we reached an open-source github repository, [rl-baselines3-zoo](https://github.com/DLR-RM/rl-baselines3-zoo), which has hyperparameters for different algorithms and environments. After using the ones provided for DQN we were able to achieve a better performance, but still fell far short of A2C’s optimal performance. This suggests that the Stable's version of DQN may lack the necessary stability mechanisms to generalize well in this simple, fast-paced environment. 
 
 Each model was trained in 300k steps. The details of each implementation and hyperparameters can be found in the notebook. The results can be seen below in the individual graphs, and the last one comparing all 3 together:
 
@@ -136,13 +136,13 @@ In this way, this could be one of the success reasons for DQN in this environmen
 
 # **3. Atari Breakout**
 
-The Atari Breakout environment has a significative differnce from the previous two. The environment is represented by a 2d image, and the agent has to learn how to play the game by observing the pixels. This represents a much more complex learning problem, as the agent has to learn how to extract features from the image and use them to make decisions.
+The Atari Breakout environment has a significant differnce from the previous two. The environment is represented by a 2d image, and the agent has to learn how to play the game by observing the pixels. This represents a much more complex learning problem, as the agent has to learn how to extract features from the image and use them to make decisions.
 
 Therefore, some key changes in the training process were made:
 
 - The policy was changed to `CnnPolicy`, which is a convolutional neural network that can process images.
 - All training was done in `cuda`.
-- The `make_atari_env` and `VecFrameStack` features of Stable-Baselines3 were used to create a vectorized environment that stacks 4 frames of the game. Even though the original goal was to use purely `gym`, these functions were necessary to create the best version (`BreakoutNoFrameskip-v4`) and to apply important pre-processing that speeds up the learning process of the agent. Not using these functions, in initial tests, resulted in the agent not being able to learn at all.
+- The `make_atari_env` and `VecFrameStack` features of Stable-Baselines3 were used to create a vectorized environment that stacks 4 frames of the game. Although the original goal was to rely purely on `gym`, the use of `make_atari_env` and `VecFrameStack` from Stable-Baselines3 was necessary. These wrappers ensure proper preprocessing (frame skipping, stacking, resizing), which significantly accelerates and stabilizes learning. Without them, the agent consistently failed to learn, even after extensive training. Not using these functions, in initial tests, resulted in the agent not being able to learn at all.
 - Both agents were trained with 2M steps, as it is a more complex environment. Even then, to achieve the peak performance, the training should take even more steps, as the agent is still learning after 2M steps. However, this was not done due to time and hardware constraints.
 
 The details of each implementation and hyperparameters can be found in the notebook. The results can be seen below in the individual graphs, and the last one comparing both together:
@@ -163,7 +163,7 @@ The details of each implementation and hyperparameters can be found in the noteb
 
 As seen in the graphs, both agents were able to learn the environment very similarly. The A2C agent was able to achieve slightly higher rewards, but the DQN agent was able to learn the environment very well too. As mentioned before, the training should take more steps to achieve the peak performance, and that was clear from the graphs, as both curves were still increasing after 2M steps.
 
-Another interesting point is that the A2C agent seems to have a more stable learning process, as the curve is smoother DQN, especially in the first 1M steps.
+Another interesting point is that the A2C agent seems to have a more stable learning process, as the curve is smoother than DQN, especially in the first 1M steps.
 
 The evaluation of the models confirms this and makes it clearer, as the average reward is much higher for A2C, around 3 times higher than DQN:
 
@@ -178,3 +178,13 @@ Mean reward: 181.1 +/- 60.36
 ```
 Mean reward: 49.0 +/- 11.65
 ```
+
+# **Overall Conclusions**
+
+In this project, we explored how A2C and DQN perform across three increasingly complex environments. The findings can be summarized:
+
+- **CartPole-v1**: A2C significantly outperformed DQN. Even with tuned hyperparameters, DQN struggled to consistently solve the task, potentially due to instability in its implementation or differences in implementation.
+- **LunarLander-v3**: DQN showed strong performance, while A2C failed to achieve positive rewards even with tuning. DQN’s use of experience replay and target networks likely helped it avoid local minima.
+- **Breakout-v4**: Both algorithms learned effectively, with A2C achieving higher average rewards and smoother training curves. The use of image-based input and convolutional policies introduced more complexity, but both agents adapted well.
+
+Each algorithm has strengths that vary by environment. DQN excels in tasks in which memory and stability can be helpful (like LunarLander), while A2C appears to work better in visual tasks and simple dynamics (like CartPole and Breakout).
